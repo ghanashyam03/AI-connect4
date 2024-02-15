@@ -1,6 +1,6 @@
 import React from 'react';
 
-function GameBoard({ boardState, onDropPiece }) {
+function GameBoard({ boardState, onDropPiece, winner }) {
   const renderBoard = () => {
     return boardState.map((row, rowIndex) => (
       <div key={rowIndex} className="row">
@@ -21,6 +21,7 @@ function GameBoard({ boardState, onDropPiece }) {
   return (
     <div className="game-board">
       {renderBoard()}
+      {winner && <div className="winner">{winner === 1 ? "You Won!!!" : "AI defeated you!"}</div>}
     </div>
   );
 }
