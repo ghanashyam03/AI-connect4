@@ -7,19 +7,30 @@ function App() {
   const [boardState, setBoardState] = useState(Array.from({ length: 6 }, () => Array(7).fill(null)));
   const [playerTurn, setPlayerTurn] = useState(1);
   const [winner, setWinner] = useState(null);
+  const [gameMode, setGameMode] = useState(null); // 'friend' or 'ai'
 
   useEffect(() => {
-    if (playerTurn === 2 && winner === null) {
+    if (playerTurn === 2 && gameMode === 'ai' && !winner) {
       makeAIMove();
     }
   }, [playerTurn]);
 
+  const handleGameModeSelect = (mode) => {
+    setGameMode(mode);
+    setBoardState(Array.from({ length: 6 }, () => Array(7).fill(null))); // Reset the board
+    setPlayerTurn(1); // Reset player turn
+    setWinner(null); // Reset winner
+  };
+
   const handleDropPiece = async (column) => {
-    if (playerTurn === 1 && winner === null) {
+    if (playerTurn === 1 && !winner) {
       const newBoardState = dropPiece(boardState, column, 1);
       setBoardState(newBoardState);
       setPlayerTurn(2);
       checkWinner(newBoardState);
+      if (gameMode === 'ai' && !winner) {
+        makeAIMove();
+      }
     }
   };
 
@@ -60,9 +71,19 @@ function App() {
   return (
     <div className="App">
       <h1>Connect 4</h1>
-      <GameBoard boardState={boardState} onDropPiece={handleDropPiece} />
-      {winner !== null && (
-        <h2>{winner === 1 ? 'Humanity succeeds!' : 'Artificial intelligence takes over!'}</h2>
+      {gameMode === null && (
+        <div className="mode-selection">
+          <button onClick={() => handleGameModeSelect('friend')}>Play with Friend</button>
+          <button onClick={() => handleGameModeSelect('ai')}>Play against AI</button>
+        </div>
+      )}
+      {gameMode && gameMode !== null && (
+        <>
+          <GameBoard boardState={boardState} onDropPiece={handleDropPiece} />
+          {winner !== null && (
+            <h2>{winner === 1 ? 'Humanity succeeds!' : 'Artificial intelligence takes over!'}</h2>
+          )}
+        </>
       )}
     </div>
   );
