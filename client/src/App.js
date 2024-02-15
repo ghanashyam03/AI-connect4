@@ -1,5 +1,3 @@
-// App.js
-
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import GameBoard from './components/GameBoard';
@@ -62,14 +60,12 @@ function App() {
   return (
     <div className="App">
       <h1>Connect 4</h1>
-      {winner !== null ? (
-        <h2>{winner === 1 ? 'Player 1 wins!' : 'Player 2 wins!'}</h2>
-      ) : (
-        <GameBoard boardState={boardState} onDropPiece={handleDropPiece} />
+      <GameBoard boardState={boardState} onDropPiece={handleDropPiece} />
+      {winner !== null && (
+        <h2>{winner === 1 ? 'Humanity succeeds!' : 'Artificial intelligence takes over!'}</h2>
       )}
     </div>
   );
 }
 
 export default App;
-
