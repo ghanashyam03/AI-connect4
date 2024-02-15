@@ -5,15 +5,25 @@ class Connect4Game:
         self.board = [[None] * self.cols for _ in range(self.rows)]
         self.turn = 1
 
-    def drop_piece(self, column, player):
-        if self.is_valid_move(column):
+    def drop_piece(self, column):  # Add the player argument
+        if 0 <= column < self.cols and self.is_valid_move(column):
             for row in range(self.rows - 1, -1, -1):
                 if self.board[row][column] is None:
-                    self.board[row][column] = player
+                    self.board[row][column] = 2  # Pass the player argument here
                     return True
             return False  # Column is full
         else:
-            return False  # Invalid move
+            return False 
+        
+    def drop(self, column):  # Add the player argument
+        if 0 <= column < self.cols and self.is_valid_move(column):
+            for row in range(self.rows - 1, -1, -1):
+                if self.board[row][column] is None:
+                    self.board[row][column] = 1  # Pass the player argument here
+                    return True
+            return False  # Column is full
+        else:
+            return False # Invalid move
 
     def is_valid_move(self, column):
         return self.board[0][column] is None
@@ -58,3 +68,9 @@ class Connect4Game:
         new_game.board = [row[:] for row in self.board]  # Deep copy of the board
         new_game.turn = self.turn
         return new_game
+    
+    def get_winner(self):
+        for player in [1, 2]:
+            if self.is_winner(player):
+                return player
+        return None

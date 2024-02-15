@@ -1,63 +1,75 @@
-  import React, { useState, useEffect } from 'react';
-  import './App.css';
-  import GameBoard from './components/GameBoard';
-  import { getAIMove } from './services/api';
+// App.js
 
-  function App() {
-    const [boardState, setBoardState] = useState(Array.from({ length: 6 }, () => Array(7).fill(null)));
-    const [playerTurn, setPlayerTurn] = useState(1);
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import GameBoard from './components/GameBoard';
+import { getAIMove } from './services/api';
 
-    useEffect(() => {
-      if (playerTurn === 2) {
-        console.log('Requesting AI move from backend...');
-        makeAIMove();
-      }
-    }, [playerTurn]);
+function App() {
+  const [boardState, setBoardState] = useState(Array.from({ length: 6 }, () => Array(7).fill(null)));
+  const [playerTurn, setPlayerTurn] = useState(1);
+  const [winner, setWinner] = useState(null);
 
-    const handleDropPiece = async (column) => {
-      if (playerTurn === 1) {
-        const newBoardState = dropPiece(boardState, column, 1);
+  useEffect(() => {
+    if (playerTurn === 2 && winner === null) {
+      makeAIMove();
+    }
+  }, [playerTurn]);
+
+  const handleDropPiece = async (column) => {
+    if (playerTurn === 1 && winner === null) {
+      const newBoardState = dropPiece(boardState, column, 1);
+      setBoardState(newBoardState);
+      setPlayerTurn(2);
+      checkWinner(newBoardState);
+    }
+  };
+
+  const makeAIMove = async () => {
+    try {
+      const response = await getAIMove(boardState, 2);
+      const responseData = await response.json();
+      const { column, updated_board_state, winner } = responseData;
+      if (column !== undefined && updated_board_state !== undefined) {
+        const newBoardState = updated_board_state;
         setBoardState(newBoardState);
-        setPlayerTurn(2);
+        setPlayerTurn(1);
+        setWinner(winner);
+      } else {
+        console.error('Invalid response from backend:', responseData);
       }
-    };
+    } catch (error) {
+      console.error('Error making AI move:', error);
+    }
+  };
 
-    const makeAIMove = async () => {
-      try {
-        const response = await getAIMove ( boardState, playerTurn );
-        const responseData = await response.json();
-        console.log('Backend response received:', responseData);
-        const { column, updated_board_state } = responseData;
-        if (column !== undefined && updated_board_state !== undefined) {
-          const newBoardState = dropPiece(updated_board_state, column, 2);
-          setBoardState(newBoardState);
-          setPlayerTurn(1);
-        } else {
-          console.error('Invalid response from backend:', responseData);
-        }
-      } catch (error) {
-        console.error('Error making AI move:', error);
+  const dropPiece = (board, column, player) => {
+    const newBoard = board.map(row => [...row]);
+    for (let row = 5; row >= 0; row--) {
+      if (newBoard[row][column] === null) {
+        newBoard[row][column] = player;
+        break;
       }
-    };
-    
-    
-    const dropPiece = (board, column, player) => {
-      const newBoard = board.map(row => [...row]);
-      for (let row = 5; row >= 0; row--) {
-        if (newBoard[row][column] === null) {
-          newBoard[row][column] = player;
-          break;
-        }
-      }
-      return newBoard;
-    };
+    }
+    return newBoard;
+  };
 
-    return (
-      <div className="App">
-        <h1>Connect 4</h1>
+  const checkWinner = (board) => {
+    // Implement logic to check for winner
+    // Update winner state accordingly
+  };
+
+  return (
+    <div className="App">
+      <h1>Connect 4</h1>
+      {winner !== null ? (
+        <h2>{winner === 1 ? 'Player 1 wins!' : 'Player 2 wins!'}</h2>
+      ) : (
         <GameBoard boardState={boardState} onDropPiece={handleDropPiece} />
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
+}
 
-  export default App;
+export default App;
+
